@@ -4,8 +4,13 @@
 </head>
 <body>
     <div>
+<<<<<<< HEAD
     {% if category %}
         <h1>{{ category.name }}</h1>
+=======
+        {% if category %}
+        <h1>{ category.name }</h1>
+>>>>>>> 57c69fcb70de55d345fbd4744d8ea0cb74da1bae
         {% if pages %}
             <ul>
                 {% for page in pages %}
@@ -14,11 +19,15 @@
             </ul>
         {% else %}
             <strong>No pages currently in category.</strong>
+<<<<<<< HEAD
         {% endif %}
     {% else %}
         The specified category does not exist!
     {% endif %}
         <a href="/rango/">Index</a>
+=======
+        {
+>>>>>>> 57c69fcb70de55d345fbd4744d8ea0cb74da1bae
     </div>
 </body>
 </html>
