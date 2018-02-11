@@ -1,9 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from rango.models import Category
-from rango.models import Page
-from rango.forms import CategoryForm
-from rango.forms import PageForm
+from rango.models import Category, Page, UserProfile
+from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 
 def index(request):
 	# Query the database for a list of ALL categories currently stored.
@@ -18,6 +16,59 @@ def index(request):
 	context_dict['pages'] = page_list
 
 	return render(request, 'rango/index.html', context_dict)
+
+def register(request):
+    #A bool flag telling the template whether reg was successful, false initially
+    registered = False
+
+    #if http post we want to try process data
+    if request.method == 'POST':
+        #try grab info from raw form info (user and userprofileform)
+        user_form = UserForm(data=request.POST)
+        profile_form = UserProfileForm(data=request.POST)
+
+        #if both forms are valid
+        if user_form.is_valid() and profile_form.is_valid():
+            #save users form data to db
+            user = user_form.save()
+
+            #now hash the password with set_password method and update object
+            user.set_password(user.password)
+            user.save()
+
+            #now sort out userprofile isntance
+            #need to set user attribute ourselves
+            #set commit=false, this delays saving the model
+            #until we're ready
+            profile = profile_form.save(commit=False)
+            profile.user = user
+
+            #did the user give ap rofile pic? if so
+            #we need to get it from the form and put
+            #it in the UserProfile model
+            if 'picture' in request.FILES:
+                profile.picture = request.FILES['picture']
+
+            #now save the userpropfile model instance
+            profile.save()
+
+            #update our variable to indiciate that the template
+            #registration was successful
+            registered = True
+        else:
+            #invalid form or forms, mistakes etc? print errors to terminal
+            print(user_form.errors, profile_form.errors)
+    else:
+        #not a http post so we render our form using two modelform instances
+        #these forms will be blank, ready for user input
+        user_form = UserForm()
+        profile_form = UserProfileForm()
+
+    #render the templat depending ont he context
+    return render(request, 'rango/register.html', {'user_form': user_form,
+                                                   'profile_form': profile_form,
+                                                   'registered':registered})
+
 
 def about(request):
 	return render(request, 'rango/about.html')
