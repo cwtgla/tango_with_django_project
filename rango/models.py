@@ -1,5 +1,18 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.contrib.auth.models import User
+
+class UserProfile(models.Model):
+    #This line is required, links UserProfile to a User model instance
+    user = models.OneToOneField(User)
+
+    #The additional attributes we want
+    website = models.URLField(blank=True)
+    picture = models.ImageField(upload_to='profile_images', blank=True)
+
+    #Override __unicode to return something meaningful
+    def __str__(self):
+        return self.user.username
 
 class Category(models.Model):
 	name = models.CharField(max_length=128, unique=True)
