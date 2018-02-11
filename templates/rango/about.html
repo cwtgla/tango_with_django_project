@@ -8,7 +8,7 @@
 
 {% block body_block %}
     <strong>This tutorial has been put together by Craig Thomson</strong>
-    <strong>You are the: {{ visits }} visitor!</strong>
+    <p>visits: {{ visits }}</p>
     <img src="{% static "images/about.jpg" %}" alt="about image" />
     <img src="{{ MEDIA_URL }}cat.jpg" alt="picture of a cat!" />
 {% endblock %}
