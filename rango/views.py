@@ -10,42 +10,43 @@ from django.contrib.auth import logout
 from datetime import datetime
 
 def visitor_cookie_handler(request, response):
-    #get the number of visits tot he site
-    #use cookies.get() function to obtain the visits cookie
-    #if it exists the value returned is casted to an integer
-    #if the cookie doesnt exist the default value of 1 is used
-    visits = int(request.COOKIES.get('visits','1'))
+	#get the number of visits tot he site
+	#use cookies.get() function to obtain the visits cookie
+	#if it exists the value returned is casted to an integer
+	#if the cookie doesnt exist the default value of 1 is used
+	visits = int(request.COOKIES.get('visits','1'))
 
-    last_visits_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
-    last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
+	last_visit_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
+	last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
 
-    #if its been more than a day since the last visit
-    if(datetime.now() - last_visit_time).days > 0:
-        visits = visits + 1
-        #update the last visit cookie now that we have updated the count
-        response.set_cookie('last_visit', str(datetime.now()))
-    else:
-        visits = 1
-        #set the last visit cookie
-        response.set_cookie('last_visit', last_visits_cookie)
+	#if its been more than a day since the last visit
+	if(datetime.now() - last_visit_time).days > 0:
+		visits = visits + 1
+		#update the last visit cookie now that we have updated the count
+		response.set_cookie('last_visit', str(datetime.now()))
+	else:
+		visits = 1
+		#set the last visit cookie
+		response.set_cookie('last_visit', last_visit_cookie)
 
-    #uodate set the visits cookie
-    response.set_cookie('visits', visits)
+	#uodate set the visits cookie
+	response.set_cookie('visits', visits)
 
 def index(request):
-	request.session.set_test_cookie()
 	# Query the database for a list of ALL categories currently stored.
 	# Order the categories by no. likes in descending order.
 	# Retrieve the top 5 only - or all if less than 5.
 	# Place the list in our context_dict dictionary
 	# that will be passed to the template engine.
 	category_list = Category.objects.order_by('-likes')[:5]
-	context_dict = {'categories':category_list}
-
 	page_list = Page.objects.order_by('-views')[:5]
-	context_dict['pages'] = page_list
+	context_dict = {'categories':category_list, 'pages':page_list}
 
-	return render(request, 'rango/index.html', context_dict)
+	response = render(request, 'rango/index.html', context_dict)
+
+	visitor_cookie_handler(request, response)
+
+	return response
 
 #use login_required() decorator to ensure only logged in users can access this
 @login_required

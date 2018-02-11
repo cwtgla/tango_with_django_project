@@ -52,6 +52,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+#MIDDLEWARE_CLASSES = [
+#    'django.contrib.sessions.middleware.SessionMiddleware',
+#]
+
 ROOT_URLCONF = 'tango_with_django_project.urls'
 
 TEMPLATES = [
