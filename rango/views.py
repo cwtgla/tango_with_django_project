@@ -2,6 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rango.models import Category, Page, UserProfile
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseRedirect, HttpResponse
+from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 def index(request):
 	# Query the database for a list of ALL categories currently stored.
@@ -16,6 +21,14 @@ def index(request):
 	context_dict['pages'] = page_list
 
 	return render(request, 'rango/index.html', context_dict)
+
+#use login_required() decorator to ensure only logged in users can access this
+@login_required
+def user_logout(request):
+    #since we knew the user is logged in we can just log them out
+    logout(request)
+    #redirect o homepage
+    return HttpResponseRedirect(reverse('index'))
 
 def register(request):
     #A bool flag telling the template whether reg was successful, false initially
@@ -72,6 +85,36 @@ def register(request):
 
 def about(request):
 	return render(request, 'rango/about.html')
+
+@login_required
+def restricted(request):
+    return HttpResponse("Since you're logged in, you can see this text!")
+
+def user_login(request):
+    #if request is a http post try get relevant info
+    if request.method == 'POST':
+        #get username and password
+        #from login form, using post.get([var])
+        #we get none rather than key var for error handling
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        #use djangos machinery to see if username/password combo is valid
+        #user object is returned if it is
+        user = authenticate(username=username, password=password)
+
+        #if we get user object the details are correct
+        if user:
+            #is account active? could be disabled
+            if user.is_active:
+                #log user in and redirect
+                login(request, user)
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            return HttpResponse("Your Rango account is disabled.")
+    else:
+        #HTTP GET so send to login form
+        return render(request, 'rango/login.html', {})
 
 def show_category(request, category_name_slug):
 	#create context dict prior to passing it to the template rendering engine
